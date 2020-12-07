@@ -1,5 +1,6 @@
 const express = require('express');
 const User = require('../models/User');
+const Book = require('../models/Book');
 const router  = express.Router();
 
 /* GET home page */
@@ -48,49 +49,39 @@ router.get('/getUser/:id', (req, res)=>{
   })
 })
 
-/* GET: Ver todos los mangas */
+// router.get('/myBooks', (req, res) => {
+//   const userId = req.user._id
+//   const user = req.user
 
-/* GET: Página principal (profile page) donde podré ver los tres grupos */
+//   User.findOne({_id: userId})
+//     .populate('myBooks')
+//     .then((result)=>{
+//       res.render('auth/myList', {boardgame_id: result.boardgame_id, user})
+//     })
+//     .catch((err)=>console.log(err))
+// })
 
-/* GET: Ver mis mangas leidos */
+router.post('/myBooks', (req, res) => {
+  const {title, image, owner} = req.body
 
-/* GET: Ver los mangas que estoy leyendo */
+  Book.create({title, image, owner})
+    .then((createdBook) => {
+      User.findByIdAndUpdate(owner, { $push: { myBooks: createdBook._id } })
+        .then((result) => result)
+    })
+    .catch((err) => console.log(err))
+})
 
-/* GET: Ver mis mangas por leer */
+router.post('/showMyBooks', (req, res) => {
 
-/* GET: Página independiente de cada manga */
-
-/* GET: Ver todos los usuarios */
-router.get('/all-users', (req, res)=>{
-  User.find({})
+  const owner = req.body.owner
+  
+  User.findById(owner)
+  .populate('myBooks')
   .then((result)=>{
     res.send(result)
   })
-  .catch((err)=>{
-    res.send(err)
-  })
+  .catch((err)=>console.log(err))
 })
-
-/* POST: Añadir manga a Leidos */
-
-/* POST: Añadir manga a Leyendo */
-
-/* POST: Añadir manga a Por leer */
-
-/* POST: Crear un manga nuevo */
-
-/* PUT: Editar usuario */
-
-/* PUT: Editar Leidos */
-
-/* PUT: Editar Leyendo */
-
-/* PUT: Editar Por Leer */
-
-/* DELETE: Eliminar usuario */
-
-/* DELETE: Eliminar manga */
-
-
 
 module.exports = router;

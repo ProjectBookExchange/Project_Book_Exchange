@@ -8,7 +8,7 @@ const userSchema = new Schema({
   name: {type: String},
   city: {type: String},
   interests: {type: String},
-  myBooks: {type: [String]},
+  myBooks: [{type: Schema.Types.ObjectId, ref: 'Book'}],
   wishList: {type: [String]},
 })
 
