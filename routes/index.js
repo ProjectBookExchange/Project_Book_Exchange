@@ -1,6 +1,7 @@
 const express = require('express');
 const User = require('../models/User');
 const Book = require('../models/Book');
+const uploadCloud = require('../config/cloudinary.js');
 const router = express.Router();
 
 /* GET home page */
@@ -19,10 +20,12 @@ router.get('/getUser/:id', (req, res) => {
     })
 })
 
-router.post('/myBooks', (req, res) => {
-  const { title, image, owner } = req.body
+router.post('/myBooks', uploadCloud.single('image_path'), (req, res) => {
+  const { title, owner } = req.body
+  const image_name = req.file ? req.file.originalname : "bookDefault.jpg"
+  const image_path = req.file ? req.file.path : "/images/bookDefault.jpg"
 
-  Book.create({ title, image, owner })
+  Book.create({ title, image_name, image_path, owner })
     .then((createdBook) => {
       User.findByIdAndUpdate(owner, { $push: { myBooks: createdBook._id } })
         .then((result) => result)
