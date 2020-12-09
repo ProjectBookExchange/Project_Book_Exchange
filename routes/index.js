@@ -65,4 +65,15 @@ router.post('/allBooks', (req, res) => {
     .catch((err) => console.log(err))
 })
 
+router.post('/publicProfile/:id', (req, res)=>{
+  const userID = req.params.id
+
+  User.findById(userID)
+  .populate('myBooks')
+  .then((result)=>{
+    res.send(result)
+  })
+  .catch((err)=>console.log(err))
+})
+
 module.exports = router;
