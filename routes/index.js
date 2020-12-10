@@ -3,6 +3,7 @@ const router = express.Router();
 
 const User = require('../models/User');
 const Book = require('../models/Book');
+const Exchange = require('../models/Exchange');
 
 const uploader = require('../configs/cloudinary-setup');
 
@@ -35,7 +36,7 @@ router.post('/uploadFile', uploader.single("imageUrl"), (req, res, next) => {
 router.post('/myBooks', (req, res, next) => {
   const {title, imageUrl, owner, owner_name} = req.body
 
-  Book.create({ title, imageUrl, owner, owner_name })
+  Book.create({ title, imageUrl, owner, owner_name, borrowedUser: ''})
     .then((createdBook) => {
       User.findByIdAndUpdate(owner, { $push: { myBooks: createdBook._id } })
         .then((result) => result)
@@ -69,6 +70,7 @@ router.post('/publicProfile/:id', (req, res)=>{
 
   User.findById(userID)
   .populate('myBooks')
+  .populate('wishList')
   .then((result)=>{
     res.send(result)
   })
@@ -82,7 +84,7 @@ router.post('/addWish', (req,res)=>{
 
   User.findByIdAndUpdate({_id: interestedUserID}, {$push: {wishList: bookToAdd._id}})
   .then(()=>{
-    Book.findByIdAndUpdate({_id: bookToAdd._id}, {interestedUsers: {interestedUserName: interestedUserName, interestedUserID: interestedUserID}})
+    Book.findByIdAndUpdate({_id: bookToAdd._id}, {$push: {interestedUsers: {interestedUserName: interestedUserName, interestedUserID: interestedUserID}}})
     .then((result)=>{
       res.send(result)
     })
@@ -100,5 +102,46 @@ router.post('/viewWishes', (req,res)=>{
   .catch((err)=>console.log(err))
 
 })
+
+router.post('/moveBorrowed', (req,res)=>{
+  
+  const exchangedBook = req.body.book
+  const clientID = req.body.profile._id
+  const clientUsername = req.body.profile.username
+  const ownerID = req.body.book.owner
+  const ownerName = req.body.book.owner_name
+
+  Book.findByIdAndUpdate({_id: req.body.book._id}, {borrowedUser: clientID})
+  .then(()=>{
+  Exchange.create({userPartner: clientUsername, borrowed: exchangedBook})
+  .then((createdBorrowExchange)=>{
+    User.findByIdAndUpdate({_id: ownerID}, {$push: {myExchanges: createdBorrowExchange._id}})
+    .then(()=>{
+      Exchange.create({userPartner: ownerName, acquired: exchangedBook})
+      .then((createdAcquiredExchange)=>{
+        User.findByIdAndUpdate({_id: clientID}, {$push: {myExchanges: createdAcquiredExchange._id}})
+        .then((result)=>result)
+      })
+    })
+  })
+  })
+
+  .catch((err)=> {
+    console.log(err)
+  })
+})
+
+router.post('/viewExchanges', (req, res) => {
+  const userID = req.body.userID
+  console.log(req.body)
+  User.findById(userID)
+  .populate('myExchanges')
+  .then((result)=>{
+    res.send(result)
+  })
+  .catch((err)=>console.log(err))
+
+})
+
 
 module.exports = router;

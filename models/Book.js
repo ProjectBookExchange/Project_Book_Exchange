@@ -7,7 +7,8 @@ const bookSchema = new Schema({
   imageUrl: {type: String},
   owner: {type: Schema.Types.ObjectId, ref: 'User'},
   owner_name: {type: String},
-  interestedUsers: {type: [Object]}
+  interestedUsers: {type: [Object]},
+  borrowedUser: {type: String}
 })
 
 const Book = mongoose.model('Book', bookSchema)
