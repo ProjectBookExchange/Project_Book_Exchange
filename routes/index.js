@@ -76,4 +76,29 @@ router.post('/publicProfile/:id', (req, res)=>{
   .catch((err)=>console.log(err))
 })
 
+router.post('/addWish', (req,res)=>{
+  const interestedUserID = req.body.userID
+  const interestedUserName = req.body.userName
+  const bookToAdd = req.body.book
+
+  User.findByIdAndUpdate({_id: interestedUserID}, {wishList: bookToAdd})
+  .then(()=>{
+    Book.findByIdAndUpdate({_id: bookToAdd._id}, {interestedUsers: interestedUserName})
+    .then((result)=>{
+      res.send(result)
+    })
+  })
+  .catch((err)=> console.log(err))
+})
+
+router.post('/viewWishes', (req,res)=>{
+  const userID = req.body.userID
+  User.findById(userID)
+  .then((result)=>{
+    res.send(result.wishList)
+  })
+  .catch((err)=>console.log(err))
+
+})
+
 module.exports = router;

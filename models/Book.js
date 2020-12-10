@@ -6,6 +6,7 @@ const bookSchema = new Schema({
   title: {type: String},
   imageUrl: {type: String},
   owner: {type: Schema.Types.ObjectId, ref: 'User'},
+  interestedUsers: {type: [String]}
 })
 
 const Book = mongoose.model('Book', bookSchema)
