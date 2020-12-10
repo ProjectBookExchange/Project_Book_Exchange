@@ -33,9 +33,9 @@ router.post('/uploadFile', uploader.single("imageUrl"), (req, res, next) => {
 })
 
 router.post('/myBooks', (req, res, next) => {
-  const {title, imageUrl, owner} = req.body
+  const {title, imageUrl, owner, owner_name} = req.body
 
-  Book.create({ title, imageUrl, owner })
+  Book.create({ title, imageUrl, owner, owner_name })
     .then((createdBook) => {
       User.findByIdAndUpdate(owner, { $push: { myBooks: createdBook._id } })
         .then((result) => result)
@@ -60,7 +60,6 @@ router.post('/allBooks', (req, res) => {
   .populate('owner')
     .then((result) => {
       res.send(result)
-
     })
     .catch((err) => console.log(err))
 })
@@ -81,7 +80,7 @@ router.post('/addWish', (req,res)=>{
   const interestedUserName = req.body.userName
   const bookToAdd = req.body.book
 
-  User.findByIdAndUpdate({_id: interestedUserID}, {wishList: bookToAdd})
+  User.findByIdAndUpdate({_id: interestedUserID}, {$push: {wishList: bookToAdd._id}})
   .then(()=>{
     Book.findByIdAndUpdate({_id: bookToAdd._id}, {interestedUsers: interestedUserName})
     .then((result)=>{
@@ -94,6 +93,7 @@ router.post('/addWish', (req,res)=>{
 router.post('/viewWishes', (req,res)=>{
   const userID = req.body.userID
   User.findById(userID)
+  .populate('wishList')
   .then((result)=>{
     res.send(result.wishList)
   })
