@@ -34,9 +34,9 @@ router.post('/uploadFile', uploader.single("imageUrl"), (req, res, next) => {
 })
 
 router.post('/myBooks', (req, res, next) => {
-  const {title, imageUrl, owner, owner_name} = req.body
+  const {title, imageUrl, owner, author, owner_name} = req.body
 
-  Book.create({ title, imageUrl, owner, owner_name, borrowedUser: ''})
+  Book.create({ title, imageUrl, owner, author, owner_name, borrowedUser: ''})
     .then((createdBook) => {
       User.findByIdAndUpdate(owner, { $push: { myBooks: createdBook._id } })
         .then((result) => result)
