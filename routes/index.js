@@ -82,7 +82,7 @@ router.post('/addWish', (req,res)=>{
 
   User.findByIdAndUpdate({_id: interestedUserID}, {$push: {wishList: bookToAdd._id}})
   .then(()=>{
-    Book.findByIdAndUpdate({_id: bookToAdd._id}, {interestedUsers: interestedUserName})
+    Book.findByIdAndUpdate({_id: bookToAdd._id}, {interestedUsers: {interestedUserName: interestedUserName, interestedUserID: interestedUserID}})
     .then((result)=>{
       res.send(result)
     })
