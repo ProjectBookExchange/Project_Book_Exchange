@@ -8,6 +8,7 @@ const bookSchema = new Schema({
   imageUrl: {type: String},
   owner: {type: Schema.Types.ObjectId, ref: 'User'},
   owner_name: {type: String},
+  owner_city: {type: String},
   interestedUsers: {type: [Object]},
   borrowedUser: {type: String}
 })
