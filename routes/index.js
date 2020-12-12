@@ -39,7 +39,7 @@ router.post('/myBooks', (req, res, next) => {
   Book.create({ title, imageUrl, owner, author, owner_name, owner_city, borrowedUser: '' })
     .then((createdBook) => {
       User.findByIdAndUpdate(owner, { $push: { myBooks: createdBook._id } })
-        .then((result) => result)
+        .then((result) => res.send(result))
     })
     .catch((err) => console.log(err))
 })
@@ -174,6 +174,20 @@ router.post('/showSearchedBooks', (req, res, next) => {
         res.send(result)
       })
       .catch((err) => console.log(err))
+
+  })
+
+  router.post('/removeMyBook', (req,res) => {
+    const bookID = req.body.book._id
+
+    Book.deleteOne({_id: bookID})
+    .then((result)=> res.send(result))
+      // Book.find()
+      // .then((result)=> {
+        // res.send(result)
+      // })
+    
+    .catch((err)=>console.log(err))
 
   })
 
