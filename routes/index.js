@@ -116,14 +116,23 @@ router.post('/addWish', (req, res) => {
   const interestedUserName = req.body.userName
   const bookToAdd = req.body.book
 
-  User.findByIdAndUpdate({ _id: interestedUserID }, { $push: { wishList: bookToAdd._id } })
+User.findById(interestedUserID)
+.then((userData)=> {
+  if (userData.wishList.includes(req.body.book._id)){
+    res.json({ message: `it's already on your list!`})
+  } else {
+    User.findByIdAndUpdate({ _id: interestedUserID }, { $push: { wishList: bookToAdd._id } })
     .then(() => {
       Book.findByIdAndUpdate({ _id: bookToAdd._id }, { $push: { interestedUsers: { interestedUserName: interestedUserName, interestedUserID: interestedUserID } } })
         .then((result) => {
           res.send(result)
         })
     })
-    .catch((err) => console.log(err))
+    
+  }
+})
+.catch((err) => console.log(err))
+
 })
 
 router.post('/viewWishes', (req, res) => {
