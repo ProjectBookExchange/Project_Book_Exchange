@@ -15,25 +15,30 @@ authRoutes.post('/signup', (req, res, next) => {
 	const city = req.body.city
 
 	if (!username || !password) {
-		res.status(400).json({ message: 'Provide username and password' });
+		res.json({ message: 'Provide username and password' }).status(400)
 		return;
 	}
 
 	if (password.length < 7) {
 		res
+		.json({ message: 'Please make your password at least 8 characters long for security purposes.' })
 			.status(400)
-			.json({ message: 'Please make your password at least 8 characters long for security purposes.' });
+			
 		return;
 	}
 
 	User.findOne({ username }, (err, foundUser) => {
 		if (err) {
-			res.status(500).json({ message: 'Username check went bad.' });
+			res
+			.json({ message: 'Username check went bad.' })
+			.status(500);
 			return;
 		}
 
 		if (foundUser) {
-			res.status(400).json({ message: 'Username taken. Choose another one.' });
+			res
+			.json({ message: 'Username taken. Choose another one.' })
+			.status(400)
 			return;
 		}
 
