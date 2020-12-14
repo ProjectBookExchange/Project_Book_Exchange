@@ -94,7 +94,7 @@ authRoutes.post('/login', (req, res, next) => {
 							return;
 					}
 
-					res.status(200).json(theUser);
+					res.status(200).json(theUser).send(req.user);
 			});
 	})(req, res, next);
 });
@@ -117,8 +117,9 @@ authRoutes.get('/loggedin', (req, res, next) => {
   if (req.isAuthenticated()) {
       res.status(200).json(req.user);
       return;
-  }
-  res.json({ });
+	}
+	res.status(403).json({ message: 'Unauthorized' })
+  // res.json({ });
 });
 
 module.exports = authRoutes;
