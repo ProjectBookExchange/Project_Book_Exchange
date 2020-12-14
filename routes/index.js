@@ -116,22 +116,22 @@ router.post('/addWish', (req, res) => {
   const interestedUserName = req.body.userName
   const bookToAdd = req.body.book
 
-User.findById(interestedUserID)
-.then((userData)=> {
-  if (userData.wishList.includes(req.body.book._id)){
-    res.json({ message: `it's already on your list!`})
-  } else {
-    User.findByIdAndUpdate({ _id: interestedUserID }, { $push: { wishList: bookToAdd._id } })
-    .then(() => {
-      Book.findByIdAndUpdate({ _id: bookToAdd._id }, { $push: { interestedUsers: { interestedUserName: interestedUserName, interestedUserID: interestedUserID } } })
-        .then((result) => {
-          res.send(result)
-        })
+  User.findById(interestedUserID)
+    .then((userData) => {
+      if (userData.wishList.includes(req.body.book._id)) {
+        res.json(`${req.body.book._id}`)
+      } else {
+        User.findByIdAndUpdate({ _id: interestedUserID }, { $push: { wishList: bookToAdd._id } })
+          .then(() => {
+            Book.findByIdAndUpdate({ _id: bookToAdd._id }, { $push: { interestedUsers: { interestedUserName: interestedUserName, interestedUserID: interestedUserID } } })
+              .then((result) => {
+                res.send(result)
+              })
+          })
+
+      }
     })
-    
-  }
-})
-.catch((err) => console.log(err))
+    .catch((err) => console.log(err))
 
 })
 
@@ -176,10 +176,10 @@ router.post('/moveBorrowed', (req, res) => {
 
 router.post('/viewExchanges', (req, res) => {
   const userID = req.body.userID
-  console.log(req.body)
   User.findById(userID)
     .populate('myExchanges')
     .then((result) => {
+      // result.sort()
       res.send(result)
     })
     .catch((err) => console.log(err))
@@ -218,6 +218,15 @@ router.post('/removeMyWishBook', (req, res) => {
     })
     .catch((err) => console.log(err))
 })
+
+router.post('/removeExchange', (req, res) => {
+  const exchangeID = req.body.exchange._id
+
+  Exchange.deleteOne({ _id: exchangeID })
+    .then((result) => res.send(result))
+    .catch((err) => console.log(err))
+})
+
 
 
 module.exports = router;
