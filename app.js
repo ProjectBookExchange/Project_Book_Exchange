@@ -58,7 +58,7 @@ mongoose
   
   app.use(cors({
     credentials: true,
-    origin: ["http://localhost:3000"]
+    origin: ["https://bookexchangeweb.netlify.app"]
   }));
   
   app.use((req, res, next)=>{
