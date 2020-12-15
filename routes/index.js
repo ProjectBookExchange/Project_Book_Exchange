@@ -146,6 +146,58 @@ router.post('/viewWishes', (req, res) => {
 
 })
 
+// router.post('/moveBorrowed', (req, res) => {
+
+//   const exchangedBook = req.body.book
+//   const clientID = req.body.profile._id
+//   const clientUsername = req.body.profile.username
+//   const ownerID = req.body.book.owner
+//   const ownerName = req.body.book.owner_name
+
+//   Book.findByIdAndUpdate({ _id: req.body.book._id }, { borrowedUser: clientID })
+//     .then(() => {
+//       Exchange.create({ userPartner: clientUsername, borrowed: exchangedBook })
+//         .then((createdBorrowExchange) => {
+//           User.findByIdAndUpdate({ _id: ownerID }, { $push: { myExchanges: createdBorrowExchange._id } })
+//             .then((resultBooks) => {
+//               const newArrBooks = []
+//               resultBooks.myBooks.map((myBook) => {
+//                 if (myBook._id != req.body.book._id) {
+//                   return newArrBooks.push(myBook)
+//                 }
+//               })
+//               User.updateOne({ _id: ownerID }, { myBooks: newArrBooks })
+//                 .then(() => {
+//                   Exchange.create({ userPartner: ownerName, acquired: exchangedBook })
+//                     .then((createdAcquiredExchange) => {
+//                       User.findByIdAndUpdate({ _id: clientID }, { $push: { myExchanges: createdAcquiredExchange._id } })
+//                         .then((resultBooksClient) => {
+
+//                           const newArrayBooks = []
+//                           resultBooksClient.wishList.map((myWishBook) => {
+//                             if (myWishBook._id != req.body.book._id) {
+//                               return newArrayBooks.push(myWishBook)
+//                             }
+//                           })
+
+//                           User.updateOne({ _id: clientID }, { wishList: newArrayBooks })
+//                           .then(()=>{
+//                             Book.deleteOne({_id: req.body.book._id})
+//                             .then((result) => res.send(result))
+//                           })
+                            
+//                         })
+//                     })
+//                 })
+//             })
+//         })
+//     })
+//     .catch((err) => {
+//       console.log(err)
+//     })
+// })
+
+
 router.post('/moveBorrowed', (req, res) => {
 
   const exchangedBook = req.body.book
@@ -159,16 +211,18 @@ router.post('/moveBorrowed', (req, res) => {
       Exchange.create({ userPartner: clientUsername, borrowed: exchangedBook })
         .then((createdBorrowExchange) => {
           User.findByIdAndUpdate({ _id: ownerID }, { $push: { myExchanges: createdBorrowExchange._id } })
-            .then(() => {
-              Exchange.create({ userPartner: ownerName, acquired: exchangedBook })
-                .then((createdAcquiredExchange) => {
-                  User.findByIdAndUpdate({ _id: clientID }, { $push: { myExchanges: createdAcquiredExchange._id } }, {$pull: {wishList: req.body.book._id}})
-                    .then((result) => result)
-                })
+            .then(() => {             
+                  Exchange.create({ userPartner: ownerName, acquired: exchangedBook })
+                    .then((createdAcquiredExchange) => {
+                      User.findByIdAndUpdate({ _id: clientID }, { $push: { myExchanges: createdAcquiredExchange._id } })
+                        .then(() => {
+                            Book.deleteOne({_id: req.body.book._id})
+                            .then((result) => res.send(result))          
+                        })
+                    })
             })
         })
     })
-
     .catch((err) => {
       console.log(err)
     })
