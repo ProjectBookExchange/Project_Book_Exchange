@@ -281,6 +281,87 @@ router.post('/removeExchange', (req, res) => {
     .catch((err) => console.log(err))
 })
 
+router.post('/editCity', (req,res)=>{
+  const userID = req.body.userID
+  const city = req.body.editedCity.city
 
+  User.findByIdAndUpdate(userID, {city: city})
+  .then((result) => res.send(result))
+  .catch((err)=>console.log(err))
+
+})
+
+// router.post('/edit-record/:_id', uploadCloud.single('attachedFile_path'), (req, res, next) => {
+
+//   let {date, players, winner, scores, linkedGame, att_name, att_path} = req.body
+//   const recordId = req.params._id
+
+//   const attachedFile_name = req.file ? req.file.originalname : att_name
+//   const attachedFile_path = req.file ? req.file.path : att_path
+
+//   Record.create({date, players, winner, scores, attachedFile_name, attachedFile_path, linkedGame})
+//   .then((newRecordCreated)=>{
+//     BoardGame.findById(linkedGame)
+//     .populate('records_id')
+//     .then((result)=>{
+//         const newRecordArr = []
+
+//         result.records_id.forEach((item)=>{
+//           if (item._id!=recordId){
+//             return newRecordArr.push(item)
+//           }
+//         })
+    
+//         newRecordArr.push(newRecordCreated)
+    
+//         BoardGame.updateOne({_id: linkedGame}, {records_id: newRecordArr})
+//         .then((result)=>{
+//           Record.findByIdAndDelete(recordId)
+//           .then(()=>{
+//             res.redirect(`/game-records/${linkedGame}`)
+//           })
+//         })
+//       })
+//       .catch((err)=>console.log(err))
+//     })
+//   })
+
+
+router.post('/searchExchange', (req, res, next) => {
+  const { userPartner, title} = req.body
+
+  if (title && userPartner) {
+    // Exchange.find({ $and: [{ userPartner: userPartner }, {$or: [{acquired: {title: title}}, {borrowed: {title: title}}] }] })
+    Exchange.find({$and: [{ userPartner: userPartner }, {acquired}]})
+
+      .then((result) => {
+        console.log(result)
+        // res.send(result)
+      })
+      .catch((err) => console.log(err))
+  }
+
+  // else if (!userPartner && title) {
+  //   Exchange.find({ title: title })
+  //     .then((result) => {
+  //       res.send(result)
+  //     })
+  //     .catch((err) => console.log(err))
+  // }
+
+  // else if (!title && userPartner) {
+  //   Exchange.find({ userPartner: userPartner })
+  //     .then((result) => {
+  //       res.send(result)
+  //     })
+  //     .catch((err) => console.log(err))
+  // } else {
+  //   Exchange.find()
+  //     .then((result) => {
+  //       res.send(result)
+  //     })
+  //     .catch((err) => console.log(err))
+  // }
+})
 
 module.exports = router;
