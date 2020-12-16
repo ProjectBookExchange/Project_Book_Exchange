@@ -70,30 +70,50 @@ router.post('/showSearchedBooks', (req, res, next) => {
 
   if (title && city) {
     Book.find({ $and: [{ owner_city: city }, { title: title }] })
+      .populate('owner')
       .then((result) => {
-        res.send(result)
+        if (result.length === 0){
+          res.json(false)
+        } else {
+          res.send(result)
+        }
       })
       .catch((err) => console.log(err))
   }
 
   else if (!city && title) {
     Book.find({ title: title })
+    .populate('owner')
       .then((result) => {
-        res.send(result)
+        if (result.length === 0){
+          res.json(false)
+        } else {
+          res.send(result)
+        }
       })
       .catch((err) => console.log(err))
   }
 
   else if (!title && city) {
     Book.find({ owner_city: city })
+    .populate('owner')
       .then((result) => {
-        res.send(result)
+        if (result.length === 0){
+          res.json(false)
+        } else {
+          res.send(result)
+        }
       })
       .catch((err) => console.log(err))
   } else {
     Book.find()
+    .populate('owner')
       .then((result) => {
-        res.send(result)
+        if (result.length === 0){
+          res.json(false)
+        } else {
+          res.send(result)
+        }
       })
       .catch((err) => console.log(err))
   }
@@ -145,57 +165,6 @@ router.post('/viewWishes', (req, res) => {
     .catch((err) => console.log(err))
 
 })
-
-// router.post('/moveBorrowed', (req, res) => {
-
-//   const exchangedBook = req.body.book
-//   const clientID = req.body.profile._id
-//   const clientUsername = req.body.profile.username
-//   const ownerID = req.body.book.owner
-//   const ownerName = req.body.book.owner_name
-
-//   Book.findByIdAndUpdate({ _id: req.body.book._id }, { borrowedUser: clientID })
-//     .then(() => {
-//       Exchange.create({ userPartner: clientUsername, borrowed: exchangedBook })
-//         .then((createdBorrowExchange) => {
-//           User.findByIdAndUpdate({ _id: ownerID }, { $push: { myExchanges: createdBorrowExchange._id } })
-//             .then((resultBooks) => {
-//               const newArrBooks = []
-//               resultBooks.myBooks.map((myBook) => {
-//                 if (myBook._id != req.body.book._id) {
-//                   return newArrBooks.push(myBook)
-//                 }
-//               })
-//               User.updateOne({ _id: ownerID }, { myBooks: newArrBooks })
-//                 .then(() => {
-//                   Exchange.create({ userPartner: ownerName, acquired: exchangedBook })
-//                     .then((createdAcquiredExchange) => {
-//                       User.findByIdAndUpdate({ _id: clientID }, { $push: { myExchanges: createdAcquiredExchange._id } })
-//                         .then((resultBooksClient) => {
-
-//                           const newArrayBooks = []
-//                           resultBooksClient.wishList.map((myWishBook) => {
-//                             if (myWishBook._id != req.body.book._id) {
-//                               return newArrayBooks.push(myWishBook)
-//                             }
-//                           })
-
-//                           User.updateOne({ _id: clientID }, { wishList: newArrayBooks })
-//                           .then(()=>{
-//                             Book.deleteOne({_id: req.body.book._id})
-//                             .then((result) => res.send(result))
-//                           })
-                            
-//                         })
-//                     })
-//                 })
-//             })
-//         })
-//     })
-//     .catch((err) => {
-//       console.log(err)
-//     })
-// })
 
 
 router.post('/moveBorrowed', (req, res) => {
@@ -290,42 +259,6 @@ router.post('/editCity', (req,res)=>{
   .catch((err)=>console.log(err))
 
 })
-
-// router.post('/edit-record/:_id', uploadCloud.single('attachedFile_path'), (req, res, next) => {
-
-//   let {date, players, winner, scores, linkedGame, att_name, att_path} = req.body
-//   const recordId = req.params._id
-
-//   const attachedFile_name = req.file ? req.file.originalname : att_name
-//   const attachedFile_path = req.file ? req.file.path : att_path
-
-//   Record.create({date, players, winner, scores, attachedFile_name, attachedFile_path, linkedGame})
-//   .then((newRecordCreated)=>{
-//     BoardGame.findById(linkedGame)
-//     .populate('records_id')
-//     .then((result)=>{
-//         const newRecordArr = []
-
-//         result.records_id.forEach((item)=>{
-//           if (item._id!=recordId){
-//             return newRecordArr.push(item)
-//           }
-//         })
-    
-//         newRecordArr.push(newRecordCreated)
-    
-//         BoardGame.updateOne({_id: linkedGame}, {records_id: newRecordArr})
-//         .then((result)=>{
-//           Record.findByIdAndDelete(recordId)
-//           .then(()=>{
-//             res.redirect(`/game-records/${linkedGame}`)
-//           })
-//         })
-//       })
-//       .catch((err)=>console.log(err))
-//     })
-//   })
-
 
 router.post('/searchExchange', (req, res, next) => {
   const { userPartner, userID } = req.body
