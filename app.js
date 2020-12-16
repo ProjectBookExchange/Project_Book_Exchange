@@ -9,6 +9,7 @@
   const logger = require('morgan');
   const path = require('path');
   const session = require('express-session');
+  const cookieSession = require('cookie-session')
   const passport = require('passport');
   const LocalStrategy = require('passport-local').Strategy;
   const bcrypt = require('bcryptjs');
@@ -58,7 +59,7 @@ mongoose
   
   app.use(cors({
     credentials: true,
-    origin: ["http://localhost:3000"]
+    origin: ["https://bookexchangeweb.netlify.app"]
   }));
   
   app.use((req, res, next)=>{
@@ -68,7 +69,25 @@ mongoose
   
   
   // Middleware de Session
-  app.use(session({ secret: 'ourPassword', resave: true, saveUninitialized: true }));
+  // app.use(session({ secret: 'ourPassword', resave: true, saveUninitialized: true }));
+  app.set('trust proxy', 1)
+  app.use(cookieSession({
+      name:'session',
+      keys: ['key1', 'key2'],
+      sameSite: 'none',
+      secure: true
+  }))
+  app.use(session ({
+    secret: `${process.env.SECRETBACK}`,
+    resave: true,
+    saveUninitialized: true,
+    cookie: {
+        sameSite: 'none',
+        secure: true
+    }
+}))
+
+
   
   //Middleware para serializar al usuario
   passport.serializeUser((user, callback) => {

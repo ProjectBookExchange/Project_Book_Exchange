@@ -328,40 +328,28 @@ router.post('/editCity', (req,res)=>{
 
 
 router.post('/searchExchange', (req, res, next) => {
-  const { userPartner, title} = req.body
+  const { userPartner, userID } = req.body
 
-  if (title && userPartner) {
-    // Exchange.find({ $and: [{ userPartner: userPartner }, {$or: [{acquired: {title: title}}, {borrowed: {title: title}}] }] })
-    Exchange.find({$and: [{ userPartner: userPartner }, {acquired}]})
-
-      .then((result) => {
-        console.log(result)
-        // res.send(result)
+  if(userPartner){
+    User.findById(userID)
+    .populate('myExchanges')
+    .then((userdata)=>{
+      const exchangesUser = userdata.myExchanges.filter((exchanges)=>{
+         return (exchanges.userPartner===userPartner)
+          
+      })
+      res.send(exchangesUser)
       })
       .catch((err) => console.log(err))
+    
+  } else {
+    User.findById(userID)
+    .populate('myExchanges')
+    .then((userdata)=>{
+      res.send(userdata.myExchanges)
+      })
+    .catch((err) => console.log(err))
   }
-
-  // else if (!userPartner && title) {
-  //   Exchange.find({ title: title })
-  //     .then((result) => {
-  //       res.send(result)
-  //     })
-  //     .catch((err) => console.log(err))
-  // }
-
-  // else if (!title && userPartner) {
-  //   Exchange.find({ userPartner: userPartner })
-  //     .then((result) => {
-  //       res.send(result)
-  //     })
-  //     .catch((err) => console.log(err))
-  // } else {
-  //   Exchange.find()
-  //     .then((result) => {
-  //       res.send(result)
-  //     })
-  //     .catch((err) => console.log(err))
-  // }
 })
 
 module.exports = router;
