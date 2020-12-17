@@ -10,6 +10,7 @@ const userSchema = new Schema({
   myBooks: [{type: Schema.Types.ObjectId, ref: 'Book'}],
   wishList: [{type: Schema.Types.ObjectId, ref: 'Book'}],
   myExchanges: [{type: Schema.Types.ObjectId, ref: 'Exchange'}],
+  myChats: [{type: Schema.Types.ObjectId, ref: 'Chat'}]
 })
 
 const User = mongoose.model('User', userSchema)

@@ -13,48 +13,20 @@ router.get('/', (req, res, next) => {
   res.send('Home')
 });
 
-router.get('/getUser/:id', (req, res) => {
+router.post('/publicProfile/:id', (req, res) => {
+  const userID = req.params.id
 
-  User.findById(req.params.id)
-    .then((result) => {
-      res.send(result)
-    })
-    .catch((err) => {
-      console.log(err)
-    })
-})
-
-router.post('/uploadFile', uploader.single("imageUrl"), (req, res, next) => {
-
-  if (!req.file) {
-    next(new Error('No file uploaded!'));
-    return;
-  }
-  res.json({ secure_url: req.file.path })
-})
-
-router.post('/myBooks', (req, res, next) => {
-  const { title, imageUrl, owner, author, owner_name, owner_city } = req.body
-
-  Book.create({ title, imageUrl, owner, author, owner_name, owner_city, borrowedUser: '' })
-    .then((createdBook) => {
-      User.findByIdAndUpdate(owner, { $push: { myBooks: createdBook._id } })
-        .then((result) => res.send(result))
-    })
-    .catch((err) => console.log(err))
-})
-
-router.post('/showMyBooks', (req, res) => {
-
-  const owner = req.body.owner
-
-  User.findById(owner)
+  User.findById(userID)
     .populate('myBooks')
+    .populate('wishList')
     .then((result) => {
       res.send(result)
     })
     .catch((err) => console.log(err))
 })
+
+
+// Book Service
 
 router.post('/allBooks', (req, res) => {
   Book.find({})
@@ -72,7 +44,7 @@ router.post('/showSearchedBooks', (req, res, next) => {
     Book.find({ $and: [{ owner_city: city }, { title: title }] })
       .populate('owner')
       .then((result) => {
-        if (result.length === 0){
+        if (result.length === 0) {
           res.json(false)
         } else {
           res.send(result)
@@ -83,9 +55,9 @@ router.post('/showSearchedBooks', (req, res, next) => {
 
   else if (!city && title) {
     Book.find({ title: title })
-    .populate('owner')
+      .populate('owner')
       .then((result) => {
-        if (result.length === 0){
+        if (result.length === 0) {
           res.json(false)
         } else {
           res.send(result)
@@ -96,9 +68,9 @@ router.post('/showSearchedBooks', (req, res, next) => {
 
   else if (!title && city) {
     Book.find({ owner_city: city })
-    .populate('owner')
+      .populate('owner')
       .then((result) => {
-        if (result.length === 0){
+        if (result.length === 0) {
           res.json(false)
         } else {
           res.send(result)
@@ -107,9 +79,9 @@ router.post('/showSearchedBooks', (req, res, next) => {
       .catch((err) => console.log(err))
   } else {
     Book.find()
-    .populate('owner')
+      .populate('owner')
       .then((result) => {
-        if (result.length === 0){
+        if (result.length === 0) {
           res.json(false)
         } else {
           res.send(result)
@@ -119,12 +91,12 @@ router.post('/showSearchedBooks', (req, res, next) => {
   }
 })
 
-router.post('/publicProfile/:id', (req, res) => {
-  const userID = req.params.id
+router.post('/showMyBooks', (req, res) => {
 
-  User.findById(userID)
+  const owner = req.body.owner
+
+  User.findById(owner)
     .populate('myBooks')
-    .populate('wishList')
     .then((result) => {
       res.send(result)
     })
@@ -166,47 +138,35 @@ router.post('/viewWishes', (req, res) => {
 
 })
 
+router.get('/getUser/:id', (req, res) => {
 
-router.post('/moveBorrowed', (req, res) => {
-
-  const exchangedBook = req.body.book
-  const clientID = req.body.profile._id
-  const clientUsername = req.body.profile.username
-  const ownerID = req.body.book.owner
-  const ownerName = req.body.book.owner_name
-
-  Book.findByIdAndUpdate({ _id: req.body.book._id }, { borrowedUser: clientID })
-    .then(() => {
-      Exchange.create({ userPartner: clientUsername, borrowed: exchangedBook })
-        .then((createdBorrowExchange) => {
-          User.findByIdAndUpdate({ _id: ownerID }, { $push: { myExchanges: createdBorrowExchange._id } })
-            .then(() => {             
-                  Exchange.create({ userPartner: ownerName, acquired: exchangedBook })
-                    .then((createdAcquiredExchange) => {
-                      User.findByIdAndUpdate({ _id: clientID }, { $push: { myExchanges: createdAcquiredExchange._id } })
-                        .then(() => {
-                            Book.deleteOne({_id: req.body.book._id})
-                            .then((result) => res.send(result))          
-                        })
-                    })
-            })
-        })
+  User.findById(req.params.id)
+    .then((result) => {
+      res.send(result)
     })
     .catch((err) => {
       console.log(err)
     })
 })
 
-router.post('/viewExchanges', (req, res) => {
-  const userID = req.body.userID
-  User.findById(userID)
-    .populate('myExchanges')
-    .then((result) => {
-      // result.sort()
-      res.send(result)
+router.post('/uploadFile', uploader.single("imageUrl"), (req, res, next) => {
+
+  if (!req.file) {
+    next(new Error('No file uploaded!'));
+    return;
+  }
+  res.json({ secure_url: req.file.path })
+})
+
+router.post('/myBooks', (req, res, next) => {
+  const { title, imageUrl, owner, author, owner_name, owner_city } = req.body
+
+  Book.create({ title, imageUrl, owner, author, owner_name, owner_city, borrowedUser: '' })
+    .then((createdBook) => {
+      User.findByIdAndUpdate(owner, { $push: { myBooks: createdBook._id } })
+        .then((result) => res.send(result))
     })
     .catch((err) => console.log(err))
-
 })
 
 router.post('/removeMyBook', (req, res) => {
@@ -242,6 +202,50 @@ router.post('/removeMyWishBook', (req, res) => {
     .catch((err) => console.log(err))
 })
 
+// Exchange Service
+
+router.post('/moveBorrowed', (req, res) => {
+
+  const exchangedBook = req.body.book
+  const clientID = req.body.profile._id
+  const clientUsername = req.body.profile.username
+  const ownerID = req.body.book.owner
+  const ownerName = req.body.book.owner_name
+
+  Book.findByIdAndUpdate({ _id: req.body.book._id }, { borrowedUser: clientID })
+    .then(() => {
+      Exchange.create({ userPartner: clientUsername, borrowed: exchangedBook })
+        .then((createdBorrowExchange) => {
+          User.findByIdAndUpdate({ _id: ownerID }, { $push: { myExchanges: createdBorrowExchange._id } })
+            .then(() => {
+              Exchange.create({ userPartner: ownerName, acquired: exchangedBook })
+                .then((createdAcquiredExchange) => {
+                  User.findByIdAndUpdate({ _id: clientID }, { $push: { myExchanges: createdAcquiredExchange._id } })
+                    .then(() => {
+                      Book.deleteOne({ _id: req.body.book._id })
+                        .then((result) => res.send(result))
+                    })
+                })
+            })
+        })
+    })
+    .catch((err) => {
+      console.log(err)
+    })
+})
+
+router.post('/viewExchanges', (req, res) => {
+  const userID = req.body.userID
+  User.findById(userID)
+    .populate('myExchanges')
+    .then((result) => {
+      // result.sort()
+      res.send(result)
+    })
+    .catch((err) => console.log(err))
+
+})
+
 router.post('/removeExchange', (req, res) => {
   const exchangeID = req.body.exchange._id
 
@@ -250,39 +254,30 @@ router.post('/removeExchange', (req, res) => {
     .catch((err) => console.log(err))
 })
 
-router.post('/editCity', (req,res)=>{
-  const userID = req.body.userID
-  const city = req.body.editedCity.city
-
-  User.findByIdAndUpdate(userID, {city: city})
-  .then((result) => res.send(result))
-  .catch((err)=>console.log(err))
-
-})
-
 router.post('/searchExchange', (req, res, next) => {
   const { userPartner, userID } = req.body
 
-  if(userPartner){
+  if (userPartner) {
     User.findById(userID)
-    .populate('myExchanges')
-    .then((userdata)=>{
-      const exchangesUser = userdata.myExchanges.filter((exchanges)=>{
-         return (exchanges.userPartner===userPartner)
-          
-      })
-      res.send(exchangesUser)
+      .populate('myExchanges')
+      .then((userdata) => {
+        const exchangesUser = userdata.myExchanges.filter((exchanges) => {
+          return (exchanges.userPartner === userPartner)
+
+        })
+        res.send(exchangesUser)
       })
       .catch((err) => console.log(err))
-    
+
   } else {
     User.findById(userID)
-    .populate('myExchanges')
-    .then((userdata)=>{
-      res.send(userdata.myExchanges)
+      .populate('myExchanges')
+      .then((userdata) => {
+        res.send(userdata.myExchanges)
       })
-    .catch((err) => console.log(err))
+      .catch((err) => console.log(err))
   }
 })
+
 
 module.exports = router;
